@@ -80,11 +80,10 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-      url: `/api/questions`,
-      type: "POST",
+      url: `/api/questions?search_term=${searchTerm}`,
+      type: "GET",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({ searchTerm: searchTerm }),
       xhrFields: {
         withCredentials: true
       },
@@ -128,12 +127,12 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => { this.getQuestions() }}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id,) => (
+            {this.state.categories && this.state.categories.length > 0 ? this.state.categories.map(({ id, type }) => (
               <li key={id} onClick={() => { this.getByCategory(id) }}>
-                {this.state.categories[id]}
-                <img className="category" src={`${this.state.categories[id]}.svg`} />
+                {type}
+                <img className="category" src={`${id}.svg`} />
               </li>
-            ))}
+            )) : null}
           </ul>
           <Search submitSearch={this.submitSearch} />
         </div>
@@ -144,7 +143,7 @@ class QuestionView extends Component {
               key={q.id}
               question={q.question}
               answer={q.answer}
-              category={this.state.categories[q.category]}
+              category={q.category}
               difficulty={q.difficulty}
               questionAction={this.questionAction(q.id)}
             />

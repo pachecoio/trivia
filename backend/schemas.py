@@ -13,6 +13,7 @@ class QuestionSchema(ma.Schema):
     id = fields.Integer()
     question = fields.String()
     answer = fields.String()
+    caregory_id = fields.Integer()
     category = fields.Nested(CategorySchema)
     difficulty = fields.Integer()
 
@@ -25,3 +26,20 @@ class QuestionCollectionSchema(ma.Schema):
         fields.Nested(CategorySchema)
     )
     current_category = fields.String()
+
+class QuestionCreateSchema(ma.Schema):
+    question = fields.String()
+    answer = fields.String()
+    category_id = fields.Integer()
+    difficulty = fields.Integer()
+
+
+class QuizCreateSchema(ma.Schema):
+    previous_questions = fields.List(fields.Integer())
+    quiz_category = fields.Integer(attribute="quiz_category")
+
+
+class ErrorHandlerSchema(ma.Schema):
+    error = fields.Boolean(default=True)
+    status_code = fields.Integer()
+    message = fields.String()

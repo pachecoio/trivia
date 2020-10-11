@@ -20,7 +20,7 @@ class FormView extends Component {
       url: `/api/categories`,
       type: "GET",
       success: (result) => {
-        this.setState({ categories: result.categories })
+        this.setState({ categories: result })
         return;
       },
       error: (error) => {
@@ -42,7 +42,7 @@ class FormView extends Component {
         question: this.state.question,
         answer: this.state.answer,
         difficulty: this.state.difficulty,
-        category: this.state.category
+        category_id: this.state.category
       }),
       xhrFields: {
         withCredentials: true
@@ -89,11 +89,11 @@ class FormView extends Component {
           <label>
             Category
             <select name="category" onChange={this.handleChange}>
-              {Object.keys(this.state.categories).map(id => {
+              {this.state.categories && this.state.categories.length > 0 ? this.state.categories.map(category => {
                 return (
-                  <option key={id} value={id}>{this.state.categories[id]}</option>
+                  <option key={category.id} value={category.id}>{category.type}</option>
                 )
-              })}
+              }) : null}
             </select>
           </label>
           <input type="submit" className="button" value="Submit" />

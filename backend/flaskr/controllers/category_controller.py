@@ -1,9 +1,10 @@
 from flask import jsonify
 import click
 from app import app
-from decorators import parse_request, Argument
+from decorators import parse_request, Argument, marshal_with
 from flaskr.repositories.category_repository import CategoryRepository
 from models import Category
+from schemas import CategorySchema
 
 
 repository = CategoryRepository()
@@ -19,6 +20,12 @@ for all available categories.
 def get_categories():
     categories = repository.filter().all()
     return jsonify([category.format() for category in categories])
+
+
+@app.route("/api/categories/<int:id>")
+@marshal_with(CategorySchema())
+def get_category(id):
+    return repository.get(id)
 
 
 """

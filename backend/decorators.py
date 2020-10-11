@@ -1,13 +1,13 @@
 from functools import wraps
 from flask import request, jsonify
 from marshmallow import ValidationError
+from error_handlers import ApiError
 
 
-def parse_with(schema, many=False):
+def parse_with(schema):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            data = {}
             form_data = request.form
             if form_data:
                 for key in form_data.keys():
@@ -18,8 +18,14 @@ def parse_with(schema, many=False):
             else:
                 data = request.get_json()
             try:
-                entity = schema(many=many).load(data)
+                entity = schema.load(data)
             except ValidationError as err:
+                api_error = args[0]
+                if isinstance(api_error, ApiError):
+                    return jsonify({
+                        "error": True,
+                        "message": api_error.message
+                    }), api_error.status_code
                 return jsonify(error=True, messages=err.messages), 400
             return f(entity, *args, **kwargs)
 
@@ -32,8 +38,9 @@ def marshal_with(schema):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            response = f(*args, **kwargs)
-            return jsonify(schema.dump(response))
+            response = schema.dump(f(*args, **kwargs))
+            status_code = response.get("status_code", 200)
+            return jsonify(response), status_code
 
         return decorated_function
 
@@ -48,7 +55,7 @@ def parse_request(arguments):
             params = request.args
             for argument in arguments:
                 if params.get(argument.name):
-                    data[argument.name] = params.get(argument.name)
+                    data[argument.name] = argument.type(params.get(argument.name))
                 elif argument.default:
                     data[argument.name] = argument.default
                 elif argument.required:
