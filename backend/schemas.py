@@ -1,15 +1,12 @@
-from app import app
 from flask_marshmallow import Marshmallow
-from marshmallow import fields
-
-ma = Marshmallow(app)
+from marshmallow import Schema, fields
 
 
-class CategorySchema(ma.Schema):
+class CategorySchema(Schema):
     id = fields.Integer()
     type = fields.String()
 
-class QuestionSchema(ma.Schema):
+class QuestionSchema(Schema):
     id = fields.Integer()
     question = fields.String()
     answer = fields.String()
@@ -17,7 +14,7 @@ class QuestionSchema(ma.Schema):
     category = fields.Nested(CategorySchema)
     difficulty = fields.Integer()
 
-class QuestionCollectionSchema(ma.Schema):
+class QuestionCollectionSchema(Schema):
     questions = fields.List(
         fields.Nested(QuestionSchema)
     )
@@ -27,19 +24,19 @@ class QuestionCollectionSchema(ma.Schema):
     )
     current_category = fields.String()
 
-class QuestionCreateSchema(ma.Schema):
+class QuestionCreateSchema(Schema):
     question = fields.String()
     answer = fields.String()
     category_id = fields.Integer()
     difficulty = fields.Integer()
 
 
-class QuizCreateSchema(ma.Schema):
+class QuizCreateSchema(Schema):
     previous_questions = fields.List(fields.Integer())
     quiz_category = fields.Integer(attribute="quiz_category")
 
 
-class ErrorHandlerSchema(ma.Schema):
+class ErrorHandlerSchema(Schema):
     error = fields.Boolean(default=True)
     status_code = fields.Integer()
     message = fields.String()

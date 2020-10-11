@@ -1,0 +1,32 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+
+  trivia_postgres:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: root
+    ports:
+      - 5432:5432
+    networks:
+      - trivia_network
+    volumes: 
+      - trivia_db:/var/lib/postgresql/data
+
+  trivia_adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - trivia_network
+    volumes: 
+      - trivia_db:/var/lib/postgresql/data
+
+volumes: 
+  trivia_db:
+    name: trivia_db
+
+networks: 
+  trivia_network:
+    name: trivia_network
