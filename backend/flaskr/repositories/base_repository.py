@@ -3,6 +3,8 @@ from sqlalchemy import exc
 from error_handlers import ApiError
 
 class BaseRepository(object):
+    name = "BaseRepository"
+    
     @property
     def session(self):
         return current_app.db.session
@@ -15,7 +17,7 @@ class BaseRepository(object):
         entity = self.query.get(id)
         if not entity:
             raise ApiError(
-                message="Item not found with id {}".format(id),
+                message="{} not found with id {}".format(self.name, id),
                 status_code=404,
             )
         return entity
@@ -37,7 +39,7 @@ class BaseRepository(object):
         entity = self.query.get(id)
         if not entity:
             raise ApiError(
-                message="Item not found with id {}".format(id),
+                message="{} not found with id {}".format(self.name, id),
                 status_code=404,
             )
         for key in kwargs.keys():

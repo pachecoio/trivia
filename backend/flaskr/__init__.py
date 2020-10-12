@@ -186,6 +186,7 @@ def create_app(test_config=None):
     @parse_with(QuestionCreateSchema())
     @marshal_with(QuestionSchema())
     def create_question(entity, *args, **kwargs):
+        category_repository.get(entity["category_id"])
         return question_repository.insert(**entity)
 
     """
@@ -209,7 +210,8 @@ def create_app(test_config=None):
         if question_ids:
             query = query.filter(not_(Question.id.in_(question_ids)))
         if category_id:
-            query = query.filter(Question.category_id == category_id)
+            category = category_repository.get(category_id)
+            query = query.filter(Question.category_id == category.id)
         questions = query.all()
         if not questions:
             raise ApiError(message="No questions left, game is over.", status_code=404)

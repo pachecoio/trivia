@@ -76,9 +76,15 @@ class TriviaTestCase(unittest.TestCase):
             difficulty=question.difficulty,
             category_id=question.category_id,
         )
-        res = self.request.post("/api/questions", json=data)
-        self.assertEqual(res.status_code, 200)
-        return json.loads(res.data)
+        return self.request.post("/api/questions", json=data)
+
+    def _create_quiz(self, previous_questions=[], quiz_category=0):
+        return self.request.post(
+            "/api/quizzes",
+            json=dict(
+                previous_questions=previous_questions, quiz_category=quiz_category
+            ),
+        )
 
     """
     TODO
@@ -121,13 +127,31 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data.get("total_questions"), 0)
         self.assertEqual(data.get("current_category"), None)
 
+    def test_create_question_category_does_not_exists(self):
+        INVALID_ID = 100
+        res = self._create_question(
+            Question(
+                question="Question fail",
+                answer="answer fail",
+                difficulty=1,
+                category_id=INVALID_ID,
+            )
+        )
+        self.assertEqual(res.status_code, 404)
+        data = json.loads(res.data)
+        self.assertEqual(
+            data["message"], "Category not found with id {}".format(INVALID_ID)
+        )
+
     def test_create_questions(self):
         for category in CATEGORIES_MOCK:
             self._create_category(type=category.type)
 
         questions = []
         for question in QUESTIONS_MOCK:
-            q = self._create_question(question)
+            res = self._create_question(question)
+            self.assertEqual(res.status_code, 200)
+            q = json.loads(res.data)
             questions.append(q)
 
         self.assertEqual(len(questions), len(QUESTIONS_MOCK))
@@ -136,6 +160,65 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(question["question"], QUESTIONS_MOCK[index].question)
             self.assertEqual(question["answer"], QUESTIONS_MOCK[index].answer)
             self.assertEqual(question["difficulty"], QUESTIONS_MOCK[index].difficulty)
+
+    def test_get_quiz_empty(self):
+        res = self._create_quiz()
+        self.assertEqual(res.status_code, 404)
+        data = json.loads(res.data)
+        self.assertEqual(data["message"], "No questions left, game is over.")
+
+    def test_get_quiz_category_all(self):
+        # Generate mock categories
+        for category in CATEGORIES_MOCK:
+            self._create_category(type=category.type)
+        # Generate mock questions
+        for question in QUESTIONS_MOCK:
+            self._create_question(question)
+
+        previous_questions = []
+        # Create 3 quizzes and test them
+        for n in range(2):
+            # Execute request
+            res = self._create_quiz(previous_questions=previous_questions)
+            # Validate response success
+            self.assertEqual(res.status_code, 200)
+            data = json.loads(res.data)
+            # Validate response=
+            self.assertNotIn(data["id"], previous_questions)
+            previous_questions.append(data["id"])
+
+    def test_get_quiz_category_1(self):
+        # Generate mock categories
+        for category in CATEGORIES_MOCK:
+            self._create_category(type=category.type)
+        # Generate mock questions
+        for question in QUESTIONS_MOCK:
+            self._create_question(question)
+
+        previous_questions = []
+        # Create 3 quizzes and test them
+        for n in range(2):
+            # Execute request
+            res = self._create_quiz(
+                previous_questions=previous_questions, quiz_category=1
+            )
+            # Validate response success
+            self.assertEqual(res.status_code, 200)
+            data = json.loads(res.data)
+            # Validate response=
+            self.assertNotIn(data["id"], previous_questions)
+            self.assertEqual(data["category"]["id"], 1)
+            previous_questions.append(data["id"])
+
+    def test_get_quiz_category_does_not_exist(self):
+        INVALID_ID = 100
+        res = self._create_quiz(quiz_category=INVALID_ID)
+        self.assertEqual(res.status_code, 404)
+        data = json.loads(res.data)
+        self.assertEqual(
+            data["message"], "Category not found with id {}".format(INVALID_ID)
+        )
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
