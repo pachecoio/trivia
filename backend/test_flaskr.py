@@ -7,60 +7,21 @@ from flaskr import create_app
 from models import setup_db, Question, Category
 
 CATEGORIES_MOCK = [
-    Category(
-        type="category 1"
-    ),
-    Category(
-        type="category 2"
-    ),
-    Category(
-        type="category 3"
-    ),
-    Category(
-        type="category 4"
-    ),
-    Category(
-        type="category 5"
-    ),
+    Category(type="category 1"),
+    Category(type="category 2"),
+    Category(type="category 3"),
+    Category(type="category 4"),
+    Category(type="category 5"),
 ]
 QUESTIONS_MOCK = [
-    Question(
-        question="question 1",
-        answer="answer 1",
-        difficulty=1,
-        category_id=1
-    ),
-    Question(
-        question="question 2",
-        answer="answer 2",
-        difficulty=5,
-        category_id=1
-    ),
-    Question(
-        question="question 3",
-        answer="answer 3",
-        difficulty=2,
-        category_id=2
-    ),
-    Question(
-        question="question 4",
-        answer="answer 4",
-        difficulty=3,
-        category_id=3
-    ),
-    Question(
-        question="question 5",
-        answer="answer 5",
-        difficulty=1,
-        category_id=4
-    ),
-    Question(
-        question="question 6",
-        answer="answer 6",
-        difficulty=2,
-        category_id=5
-    ),
+    Question(question="question 1", answer="answer 1", difficulty=1, category_id=1),
+    Question(question="question 2", answer="answer 2", difficulty=5, category_id=1),
+    Question(question="question 3", answer="answer 3", difficulty=2, category_id=2),
+    Question(question="question 4", answer="answer 4", difficulty=3, category_id=3),
+    Question(question="question 5", answer="answer 5", difficulty=1, category_id=4),
+    Question(question="question 6", answer="answer 6", difficulty=2, category_id=5),
 ]
+
 
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
@@ -79,7 +40,7 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
-    
+
     def tearDown(self):
         """Executed after reach test"""
         with self.app.app_context():
@@ -126,14 +87,19 @@ class TriviaTestCase(unittest.TestCase):
     """
     Test categories
     """
+
     def test_get_categories_empty(self):
         data = self._get_categories()
         self.assertEqual(len(data), 0)
 
-    def test_create_category(self):
-        type = "Science"
-        data = self._create_category(type)
-        self.assertEqual(data["type"], type)
+    def test_create_categories(self):
+        categories = []
+        for category in CATEGORIES_MOCK:
+            c = self._create_category(type=category.type)
+            categories.append(c)
+        self.assertEqual(len(categories), len(CATEGORIES_MOCK))
+        for index, category in enumerate(categories):
+            self.assertEqual(category["type"], CATEGORIES_MOCK[index].type)
 
     def test_get_categories_success(self):
         # Create categories
@@ -144,10 +110,10 @@ class TriviaTestCase(unittest.TestCase):
         data = self._get_categories()
         self.assertEqual(len(data), 2)
 
-
     """
     Test questions
     """
+
     def test_get_questions_empty(self):
         data = self._get_questions()
         self.assertEqual(len(data.get("categories")), 0)
@@ -166,8 +132,10 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(len(questions), len(QUESTIONS_MOCK))
 
-    
-
+        for index, question in enumerate(questions):
+            self.assertEqual(question["question"], QUESTIONS_MOCK[index].question)
+            self.assertEqual(question["answer"], QUESTIONS_MOCK[index].answer)
+            self.assertEqual(question["difficulty"], QUESTIONS_MOCK[index].difficulty)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
