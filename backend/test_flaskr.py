@@ -35,6 +35,7 @@ class TriviaTestCase(unittest.TestCase):
     """
     def test_get_categories(self):
         res = self.client().get("/api/categories")
+        print(json.loads(res.data))
         self.assertEqual(res.status_code, 200)
 
 

@@ -18,6 +18,7 @@ from schemas import (
     QuestionCreateSchema,
     QuestionSchema,
     QuizCreateSchema,
+    ErrorHandlerSchema,
 )
 from error_handlers import ApiError
 from sqlalchemy import or_, not_
@@ -197,14 +198,20 @@ def create_app(test_config=None):
     def get_quiz(entity, **kwargs):
         question_ids = entity.get("previous_questions")
         category_id = entity.get("quiz_category")
-        questions = (
-            question_repository.query.filter(Question.category_id == category_id)
-            .filter(not_(Question.id.in_(question_ids)))
-            .all()
-        )
+        query = question_repository.query
+        if question_ids:
+            query = query.filter(not_(Question.id.in_(question_ids)))
+        if category_id:
+            query = query.filter(Question.category_id == category_id)
+        questions = query.all()
         if not questions:
             raise ApiError(message="No questions left, game is over.", status_code=404)
         index = random.randint(0, len(questions) - 1)
         return questions[index]
+
+    @app.errorhandler(ApiError)
+    @marshal_with(ErrorHandlerSchema())
+    def handle_invalid_usage(error):
+        return error
 
     return app
