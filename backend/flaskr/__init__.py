@@ -14,6 +14,7 @@ from models import setup_db, Question, Category
 import click
 from schemas import (
     CategorySchema,
+    CategoryCreateSchema,
     QuestionCollectionSchema,
     QuestionCreateSchema,
     QuestionSchema,
@@ -51,10 +52,16 @@ def create_app(test_config=None):
     for all available categories.
     """
 
-    @app.route("/api/categories")
+    @app.route("/api/categories", methods=["GET"])
     def get_categories():
         categories = category_repository.filter().all()
         return jsonify([category.format() for category in categories])
+
+    @app.route("/api/categories", methods=["POST"])
+    @parse_with(CategoryCreateSchema())
+    @marshal_with(CategorySchema())
+    def create_categories_route(entity):
+        return category_repository.insert(**entity)
 
     @app.route("/api/categories/<int:id>")
     @marshal_with(CategorySchema())

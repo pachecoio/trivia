@@ -10,6 +10,7 @@ def parse_with(schema):
         def decorated_function(*args, **kwargs):
             form_data = request.form
             if form_data:
+                data = {}
                 for key in form_data.keys():
                     if form_data.getlist(key) and len(form_data.getlist(key)) > 1:
                         data[key] = form_data.getlist(key)

@@ -6,6 +6,9 @@ class CategorySchema(Schema):
     id = fields.Integer()
     type = fields.String()
 
+class CategoryCreateSchema(Schema):
+    type = fields.String()
+
 class QuestionSchema(Schema):
     id = fields.Integer()
     question = fields.String()
