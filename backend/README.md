@@ -54,18 +54,8 @@ Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` d
 
 ## Endpoints
 
-GET '/api/categories'
-GET '/api/categories/<int:id>'
-POST '/api/categories'
 
-GET '/api/questions'
-GET '/api/categories/<int:current_category>/questions'
-GET '/api/questions/<int:id>'
-POST '/api/questions'
-
-POST '/api/quizzes'
-
-GET '/categories'
+### GET '/categories'
 - Fetches a list of categories
 - Request Arguments: None
 - Returns: A list of category objects with two keys: id and type
@@ -82,7 +72,7 @@ GET '/categories'
 ]
 ```
 
-GET '/api/categories/<int:id>'
+### GET '/api/categories/<int:id>'
 - Fetches a single category by id
 - Request Arguments: id
 - Returns: A category object with two keys: id and type
@@ -93,7 +83,7 @@ GET '/api/categories/<int:id>'
 }
 ```
 
-POST '/api/categories'
+### POST '/api/categories'
 - Creates a new category
 - Request Arguments: None
 - Request body: 
@@ -112,7 +102,7 @@ POST '/api/categories'
 }
 ```
 
-GET '/api/questions'
+### GET '/api/questions'
 - Fetches a list of questions
 - Request Arguments: None
 - Request Params:
@@ -154,7 +144,7 @@ GET '/api/questions'
 }
 ```
 
-POST '/api/questions'
+### POST '/api/questions'
 - Creates a new question
 - Request Arguments: None
 - Request body: 
@@ -182,7 +172,7 @@ POST '/api/questions'
 }
 ```
 
-DELETE '/api/questions/<int:id>'
+### DELETE '/api/questions/<int:id>'
 - Deletes a question
 - Request Arguments: id
 - Returns: A category object with two keys: id and type
@@ -194,7 +184,7 @@ DELETE '/api/questions/<int:id>'
 }
 ```
 
-POST '/api/quizzes'
+### POST '/api/quizzes'
 - Creates a new quiz
 - Request Arguments: None
 - Request body: 
