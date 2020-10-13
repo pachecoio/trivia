@@ -55,7 +55,7 @@ Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` d
 ## Endpoints
 
 
-### GET '/categories'
+### GET '/api/categories'
 - Fetches a list of categories
 - Request Arguments: None
 - Returns: A list of category objects with two keys: id and type
