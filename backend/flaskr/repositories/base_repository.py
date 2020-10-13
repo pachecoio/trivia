@@ -29,29 +29,47 @@ class BaseRepository(object):
         return query
 
     def insert(self, **kwargs):
-        entity = self.model(**kwargs)
-        self.session.add(entity)
-        self.session.commit()
-        self.session.refresh(entity)
-        return entity
+        try:
+            entity = self.model(**kwargs)
+            self.session.add(entity)
+            self.session.commit()
+            self.session.refresh(entity)
+            return entity
+        except:
+            raise ApiError(
+                message="Error creating new {}".format(self.name),
+                status_code=500,
+            )
 
     def update(self, id, **kwargs):
-        entity = self.query.get(id)
-        if not entity:
+        try:
+            entity = self.query.get(id)
+            if not entity:
+                raise ApiError(
+                    message="{} not found with id {}".format(self.name, id),
+                    status_code=404,
+                )
+            for key in kwargs.keys():
+                if hasattr(self.model, key):
+                    setattr(self.model, key, kwargs.get(key))
+            self.session.add(entity)
+            self.session.commit()
+            self.session.refresh(entity)
+            return entity
+        except:
             raise ApiError(
-                message="{} not found with id {}".format(self.name, id),
-                status_code=404,
+                message="Error updating {}".format(self.name),
+                status_code=500,
             )
-        for key in kwargs.keys():
-            if hasattr(self.model, key):
-                setattr(self.model, key, kwargs.get(key))
-        self.session.add(entity)
-        self.session.commit()
-        self.session.refresh(entity)
-        return entity
 
     def delete(self, id):
-        entity = self.get(id)
-        self.session.delete(entity)
-        self.session.commit()
-        return "", 204
+        try:
+            entity = self.get(id)
+            self.session.delete(entity)
+            self.session.commit()
+            return "", 204
+        except:
+            raise ApiError(
+                message="Error deleting {}".format(self.name),
+                status_code=500,
+            )

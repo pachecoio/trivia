@@ -55,7 +55,7 @@ class TriviaTestCase(unittest.TestCase):
     def _create_category(self, type):
         res = self.request.post("/api/categories", json=dict(type=type))
         data = json.loads(res.data)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         return data
 
     def _get_categories(self):
@@ -106,6 +106,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(categories), len(CATEGORIES_MOCK))
         for index, category in enumerate(categories):
             self.assertEqual(category["type"], CATEGORIES_MOCK[index].type)
+            
+    def test_create_category_wrong_values(self):
+        res = self.request.post("/api/categories", json=dict({"test": "test"}))
+        self.assertEqual(res.status_code, 400)
+        data = json.loads(res.data)
+        self.assertEqual(data["messages"]["test"], ["Unknown field."])
 
     def test_get_categories_success(self):
         # Create categories
@@ -142,6 +148,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(
             data["message"], "Category not found with id {}".format(INVALID_ID)
         )
+        
+    def test_create_question_wrong_values(self):
+        res = self.request.post("/api/questions", json=dict({"test": "test"}))
+        self.assertEqual(res.status_code, 400)
+        data = json.loads(res.data)
+        self.assertEqual(data["messages"]["test"], ["Unknown field."])
 
     def test_create_questions(self):
         for category in CATEGORIES_MOCK:
@@ -150,7 +162,7 @@ class TriviaTestCase(unittest.TestCase):
         questions = []
         for question in QUESTIONS_MOCK:
             res = self._create_question(question)
-            self.assertEqual(res.status_code, 200)
+            self.assertEqual(res.status_code, 201)
             q = json.loads(res.data)
             questions.append(q)
 
@@ -181,7 +193,7 @@ class TriviaTestCase(unittest.TestCase):
             # Execute request
             res = self._create_quiz(previous_questions=previous_questions)
             # Validate response success
-            self.assertEqual(res.status_code, 200)
+            self.assertEqual(res.status_code, 201)
             data = json.loads(res.data)
             # Validate response=
             self.assertNotIn(data["id"], previous_questions)
@@ -203,7 +215,7 @@ class TriviaTestCase(unittest.TestCase):
                 previous_questions=previous_questions, quiz_category=1
             )
             # Validate response success
-            self.assertEqual(res.status_code, 200)
+            self.assertEqual(res.status_code, 201)
             data = json.loads(res.data)
             # Validate response=
             self.assertNotIn(data["id"], previous_questions)
@@ -218,6 +230,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(
             data["message"], "Category not found with id {}".format(INVALID_ID)
         )
+        
 
 
 # Make the tests conveniently executable

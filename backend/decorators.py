@@ -21,12 +21,13 @@ def parse_with(schema):
             try:
                 entity = schema.load(data)
             except ValidationError as err:
-                api_error = args[0]
-                if isinstance(api_error, ApiError):
-                    return jsonify({
-                        "error": True,
-                        "message": api_error.message
-                    }), api_error.status_code
+                if args:
+                    api_error = args[0]
+                    if isinstance(api_error, ApiError):
+                        return (
+                            jsonify({"error": True, "message": api_error.message}),
+                            api_error.status_code,
+                        )
                 return jsonify(error=True, messages=err.messages), 400
             return f(entity, *args, **kwargs)
 
@@ -35,12 +36,22 @@ def parse_with(schema):
     return decorator
 
 
+def get_status_code_success(method):
+    if method == "POST":
+        return 201
+    if method == "DELETE":
+        return 202
+    return 200
+
+
 def marshal_with(schema):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
             response = schema.dump(f(*args, **kwargs))
-            status_code = response.get("status_code", 200)
+            status_code = response.get(
+                "status_code", get_status_code_success(request.method)
+            )
             return jsonify(response), status_code
 
         return decorated_function

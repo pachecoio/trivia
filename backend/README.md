@@ -52,49 +52,198 @@ Setting the `FLASK_ENV` variable to `development` will detect file changes and r
 
 Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
-## Tasks
+## Endpoints
 
-One note before you delve into your tasks: for each endpoint you are expected to define the endpoint and response data. The frontend will be a plentiful resource because it is set up to expect certain endpoints and response data formats already. You should feel free to specify endpoints in your own way; if you do so, make sure to update the frontend or you will get some unexpected behavior. 
+GET '/api/categories'
+GET '/api/categories/<int:id>'
+POST '/api/categories'
 
-1. Use Flask-CORS to enable cross-domain requests and set response headers. 
-2. Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, number of total questions, current category, categories. 
-3. Create an endpoint to handle GET requests for all available categories. 
-4. Create an endpoint to DELETE question using a question ID. 
-5. Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score. 
-6. Create a POST endpoint to get questions based on category. 
-7. Create a POST endpoint to get questions based on a search term. It should return any questions for whom the search term is a substring of the question. 
-8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
-9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
+GET '/api/questions'
+GET '/api/categories/<int:current_category>/questions'
+GET '/api/questions/<int:id>'
+POST '/api/questions'
 
-REVIEW_COMMENT
-```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
-
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
+POST '/api/quizzes'
 
 GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
+- Fetches a list of categories
 - Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
+- Returns: A list of category objects with two keys: id and type
 ```
+[
+  {
+    "id": 1,
+    "type: "Science",
+  },
+  {
+    "id": 2,
+    "type: "Art",
+  }
+]
+```
+
+GET '/api/categories/<int:id>'
+- Fetches a single category by id
+- Request Arguments: id
+- Returns: A category object with two keys: id and type
+```
+{
+  "id": 1,
+  "type: "Science",
+}
+```
+
+POST '/api/categories'
+- Creates a new category
+- Request Arguments: None
+- Request body: 
+  - Type: json
+  - Content:
+ ```
+{
+  "type: "Science",
+}
+ ```
+- Returns: A category object with two keys: id and type
+```
+{
+  "id": 1,
+  "type: "Science",
+}
+```
+
+GET '/api/questions'
+- Fetches a list of questions
+- Request Arguments: None
+- Request Params:
+  - page:
+    - required: False
+    - type: Integer
+  - limit:
+    - required: False
+    - type: Integer
+  - search_term:
+    - required: False
+    - type: String
+- Returns: A list an object with list the result questions based on the search, all categories, current category and total questions.
+```
+{
+  "categories": [
+    {
+      "id": 1,
+      "type": "Movies"
+    }
+  ],
+  "current_category": {
+    "id": 1,
+    "type": "Movies"
+  },
+  "questions": [
+    {
+      "answer": "answer",
+      "category": {
+        "id": 1,
+        "type": "Movies"
+      },
+      "difficulty": 1,
+      "id": 1,
+      "question": "question"
+    }
+  ],
+  "total_questions": 0
+}
+```
+
+POST '/api/questions'
+- Creates a new question
+- Request Arguments: None
+- Request body: 
+  - Type: json
+  - Content:
+ ```
+{
+	"question": "question",
+	"answer": "answer",
+	"difficulty": 1,
+	"category_id": 1
+}
+ ```
+- Returns: A question object with two keys: id, question, answer, category and difficulty
+```
+{
+  "answer": "answer",
+  "category": {
+    "id": 1,
+    "type": "Movies"
+  },
+  "difficulty": 1,
+  "id": 1,
+  "question": "question"
+}
+```
+
+DELETE '/api/questions/<int:id>'
+- Deletes a question
+- Request Arguments: id
+- Returns: A category object with two keys: id and type
+```
+{
+  "id": 1,
+  "error": false,
+  "message": "Item deleted successfully"
+}
+```
+
+POST '/api/quizzes'
+- Creates a new quiz
+- Request Arguments: None
+- Request body: 
+  - Type: json
+  - Content:
+ ```
+{
+	"previous_questions": [
+    2, 3
+  ],
+	"quiz_category": 1
+}
+ ```
+- Returns: A question object with two keys: id, question, answer, category and difficulty.
+This endpoint returns a question that DOES NOT have the ID equal to one of the `previous_questions` ids passed and it also has to have a `category_id` equal to the one requested.
+If the `quiz_category` value is equal to 0, it returns all existing questions.
+```
+{
+  "answer": "answer",
+  "category": {
+    "id": 1,
+    "type": "Movies"
+  },
+  "difficulty": 1,
+  "id": 3,
+  "question": "question"
+}
+```
+
+## Error Handling
+
+Errors are returned as JSON objects in the following format:
+```
+{
+  "error": true,
+  "message": "Item not found",
+  "status_code": 404
+}
+```
+
+The API will return four error types when requests fail:
+- 400: Bad Request
+- 404: Resource Not Found
+- 422: Not Processable
+- 500: Server Error
 
 
 ## Testing
 To run the tests, run
 ```
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
 python test_flaskr.py
 ```

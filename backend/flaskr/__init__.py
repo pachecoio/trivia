@@ -170,7 +170,10 @@ def create_app(test_config=None):
     @app.route("/api/questions/<int:id>", methods=["DELETE"])
     def delete_question(id):
         question_repository.delete(id)
-        return jsonify({"error": False, "message": "Item delete successfully"}), 202
+        return (
+            jsonify({"id": id, "error": False, "message": "Item delete successfully"}),
+            202,
+        )
 
     """
     @TODO: 
@@ -222,5 +225,13 @@ def create_app(test_config=None):
     @marshal_with(ErrorHandlerSchema())
     def handle_invalid_usage(error):
         return error
+
+    @app.errorhandler(500)
+    def handle_server_error():
+        return jsonify({"error": True, "message": "Server error."}), 500
+
+    @app.errorhandler(422)
+    def handle_unprocessable_entity():
+        return jsonify({"error": True, "message": "Unable to process the request."}), 422
 
     return app
